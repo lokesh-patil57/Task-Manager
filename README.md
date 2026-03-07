@@ -2,6 +2,12 @@
 
 AI-powered task management web app with Kanban board, analytics, and productivity insights. Built with React + Vite on the frontend and Node.js + Express + MongoDB on the backend, with Google OAuth and Gemini-powered AI helpers.
 
+<div class="flex justify-center">
+  <br />
+      <img src="client/src/assets/Project.png" alt="Project Banner">
+  <br />
+ </div>
+
 ## Features
 
 - **Authentication**
