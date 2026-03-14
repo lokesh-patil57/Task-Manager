@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AppShell from './components/AppShell'
 import { useAuth } from './context/AuthContext'
+import { Analytics } from "@vercel/analytics/react"
 
 function OAuthTokenBridge() {
   const location = useLocation()
@@ -167,6 +168,7 @@ const App = () => {
           <Route path='*' element={<Navigate to='/' replace />} />
 
         </Routes>
+        <Analytics />
       </Suspense>
     </AnimatePresence>
   )
