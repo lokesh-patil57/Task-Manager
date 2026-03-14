@@ -88,17 +88,31 @@ function googleSuccess(req, res) {
   const user = req.user;
   const token = signToken(user);
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = req.oauthClientUrl || process.env.CLIENT_URL || 'http://localhost:5173';
   const redirectUrl = new URL('/oauth-success', clientUrl);
   redirectUrl.searchParams.set('token', token);
 
   return res.redirect(redirectUrl.toString());
 }
 
+async function getMe(req, res, next) {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    return res.json({
+      success: true,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   register,
   login,
   googleSuccess,
+  getMe,
   registerValidators,
   loginValidators,
 };
