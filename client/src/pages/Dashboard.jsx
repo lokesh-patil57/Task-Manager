@@ -202,11 +202,11 @@ export default function Dashboard() {
               <SkeletonCard className='h-24' />
               <SkeletonCard className='h-24' />
             </div>
-            <SkeletonCard className='h-[360px]' />
+            <SkeletonCard className='h-90' />
           </div>
           <div className='space-y-4'>
-            <SkeletonCard className='h-[200px]' />
-            <SkeletonCard className='h-[260px]' />
+            <SkeletonCard className='h-50' />
+            <SkeletonCard className='h-65' />
           </div>
         </div>
       </div>
@@ -353,7 +353,7 @@ export default function Dashboard() {
           <div className='glass p-4'>
             <div className='flex items-center justify-between gap-3'>
               <div className='text-sm font-semibold'>Selected Task</div>
-              <button className='btn !px-3' onClick={() => setBreakdownOpen(true)} disabled={!selectedTask}>
+              <button className='btn px-3!' onClick={() => setBreakdownOpen(true)} disabled={!selectedTask}>
                 AI Breakdown
               </button>
             </div>

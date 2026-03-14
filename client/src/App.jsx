@@ -1,15 +1,65 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AppShell from './components/AppShell'
 import { useAuth } from './context/AuthContext'
 
-const Login = lazy(() => import('./pages/Login.jsx'))
-const Register = lazy(() => import('./pages/Register.jsx'))
+function OAuthTokenBridge() {
+  const location = useLocation()
+  const { setTokenFromOAuth } = useAuth()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const token = params.get('token')
+    if (!token) return
+
+    setTokenFromOAuth(token)
+
+    params.delete('token')
+    const nextSearch = params.toString()
+    const nextUrl = `${location.pathname}${nextSearch ? `?${nextSearch}` : ''}${location.hash || ''}`
+    window.history.replaceState({}, '', nextUrl)
+  }, [location.hash, location.pathname, location.search, setTokenFromOAuth])
+
+  return null
+}
+
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, initialized } = useAuth()
+  const location = useLocation()
+  const params = new URLSearchParams(location.search)
+  const hasOauthToken = Boolean(params.get('token'))
+  if (!initialized) {
+    return (
+      <div className='min-h-screen grid place-items-center'>
+        <div className='glass p-6 text-white/70'>Authenticating…</div>
+      </div>
+    )
+  }
+  if (!isAuthenticated && !hasOauthToken) {
+    return <Navigate to='/login' replace state={{ from: location }} />
+  }
+  return children
+}
+
+function PublicOnlyRoute({ children }) {
+  const { isAuthenticated, initialized } = useAuth()
+  if (!initialized) return null
+  if (isAuthenticated) return <Navigate to='/dashboard' replace />
+  return children
+}
+
+const Home         = lazy(() => import('./pages/Home.jsx'))
+const Login        = lazy(() => import('./pages/Login.jsx'))
+const Register     = lazy(() => import('./pages/Register.jsx'))
 const OAuthSuccess = lazy(() => import('./pages/OAuthSuccess.jsx'))
-const Home = lazy(() => import('./pages/Home.jsx'))
-const Dashboard = lazy(() => import('./pages/Dashboard.jsx'))
-const Analytics = lazy(() => import('./pages/Analytics.jsx'))
+const Dashboard    = lazy(() => import('./pages/Dashboard.jsx'))
+const Tasks        = lazy(() => import('./pages/Tasks.jsx'))
+const Analytics    = lazy(() => import('./pages/Analytics.jsx'))
+const Profile      = lazy(() => import('./pages/Profile.jsx'))
+const AIPlanner    = lazy(() => import('./pages/AIPlanner.jsx'))
+const AIBreakdown  = lazy(() => import('./pages/AIBreakdown.jsx'))
+const AIInsights   = lazy(() => import('./pages/AIInsights.jsx'))
 
 function Page({ children }) {
   const location = useLocation()
@@ -26,92 +76,96 @@ function Page({ children }) {
   )
 }
 
-function Protected({ children }) {
-  const { token } = useAuth()
-  if (!token) return <Navigate to='/login' replace />
-  return children
+const PAGE_TITLES = {
+  '/':              'AI Productivity Platform',
+  '/login':         'Login',
+  '/register':      'Create Account',
+  '/oauth-success': 'OAuth Success',
+  '/dashboard':     'Dashboard',
+  '/tasks':         'Tasks',
+  '/analytics':     'Analytics',
+  '/profile':       'Profile',
+  '/ai-planner':    'AI Planner',
+  '/ai-breakdown':  'AI Breakdown',
+  '/ai-insights':   'AI Insights',
 }
 
 const App = () => {
-  const { token } = useAuth()
   const location = useLocation()
 
-  const isAuthed = Boolean(token)
+  useEffect(() => {
+    document.title = `TaskFlow | ${PAGE_TITLES[location.pathname] ?? 'App'}`
+  }, [location.pathname])
 
   return (
     <AnimatePresence mode='wait'>
       <Suspense
         fallback={
-          <div className='min-h-screen grid place-items-center px-4 bg-gradient-to-br from-black via-gray-900 to-black'>
+          <div className='min-h-screen grid place-items-center px-4 bg-linear-to-br from-black via-gray-900 to-black'>
             <div className='glass p-6 text-white/80'>Loading…</div>
           </div>
         }
       >
+        <OAuthTokenBridge />
         <Routes location={location} key={location.pathname}>
-          <Route path='/' element={<Navigate to={isAuthed ? '/home' : '/login'} replace />} />
-          <Route
-            path='/login'
-            element={
-              <Page>
-                <Login />
-              </Page>
-            }
-          />
-          <Route
-            path='/register'
-            element={
-              <Page>
-                <Register />
-              </Page>
-            }
-          />
-          <Route
-            path='/oauth-success'
-            element={
-              <Page>
-                <OAuthSuccess />
-              </Page>
-            }
-          />
 
-          <Route
-            path='/home'
-            element={
-              <Protected>
-                <AppShell title='Home'>
-                  <Page>
-                    <Home />
-                  </Page>
-                </AppShell>
-              </Protected>
-            }
-          />
+          <Route path='/' element={<Page><Home /></Page>} />
 
-          <Route
-            path='/dashboard'
-            element={
-              <Protected>
-                <AppShell title='Dashboard'>
-                  <Page>
-                    <Dashboard />
-                  </Page>
-                </AppShell>
-              </Protected>
-            }
-          />
-          <Route
-            path='/analytics'
-            element={
-              <Protected>
-                <AppShell title='Analytics'>
-                  <Page>
-                    <Analytics />
-                  </Page>
-                </AppShell>
-              </Protected>
-            }
-          />
+          <Route path='/login' element={
+            <PublicOnlyRoute><Page><Login /></Page></PublicOnlyRoute>
+          } />
+
+          <Route path='/register' element={
+            <PublicOnlyRoute><Page><Register /></Page></PublicOnlyRoute>
+          } />
+
+          <Route path='/oauth-success' element={<Page><OAuthSuccess /></Page>} />
+          <Route path='/home' element={<Navigate to='/dashboard' replace />} />
+
+          <Route path='/dashboard' element={
+            <ProtectedRoute>
+              <AppShell title='Dashboard'><Page><Dashboard /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
+          <Route path='/tasks' element={
+            <ProtectedRoute>
+              <AppShell title='Tasks'><Page><Tasks /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
+          <Route path='/analytics' element={
+            <ProtectedRoute>
+              <AppShell title='Analytics'><Page><Analytics /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
+          <Route path='/profile' element={
+            <ProtectedRoute>
+              <AppShell title='Profile'><Page><Profile /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
+          <Route path='/ai-planner' element={
+            <ProtectedRoute>
+              <AppShell title='AI Planner'><Page><AIPlanner /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
+          <Route path='/ai-breakdown' element={
+            <ProtectedRoute>
+              <AppShell title='AI Breakdown'><Page><AIBreakdown /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
+          <Route path='/ai-insights' element={
+            <ProtectedRoute>
+              <AppShell title='AI Insights'><Page><AIInsights /></Page></AppShell>
+            </ProtectedRoute>
+          } />
+
           <Route path='*' element={<Navigate to='/' replace />} />
+
         </Routes>
       </Suspense>
     </AnimatePresence>
