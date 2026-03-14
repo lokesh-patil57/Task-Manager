@@ -1,5 +1,5 @@
+import { DragDropContext, Draggable } from '@hello-pangea/dnd'
 import { AnimatePresence, motion } from 'framer-motion'
-import { DragDropContext, Draggable } from 'react-beautiful-dnd'
 import TaskCard from './TaskCard'
 import TaskColumn from './TaskColumn'
 
@@ -9,12 +9,19 @@ const columns = [
   { id: 'done', title: 'Completed' },
 ]
 
-export default function TaskBoard({ tasksByStatus, onDragEnd, onSelectTask, onDeleteTask }) {
+const noop = () => {}
+
+export default function TaskBoard({
+  tasksByStatus = {},
+  onDragEnd = noop,
+  onSelectTask = noop,
+  onDeleteTask = noop,
+}) {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className='grid grid-cols-1 gap-4 xl:grid-cols-3'>
         {columns.map((col) => {
-          const tasks = tasksByStatus[col.id] || []
+          const tasks = Array.isArray(tasksByStatus[col.id]) ? tasksByStatus[col.id] : []
           return (
             <TaskColumn key={col.id} droppableId={col.id} title={col.title} count={tasks.length}>
               <AnimatePresence initial={false}>

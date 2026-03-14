@@ -1,5 +1,5 @@
+import { Droppable } from '@hello-pangea/dnd'
 import { motion } from 'framer-motion'
-import { Droppable } from 'react-beautiful-dnd'
 import { memo } from 'react'
 
 function TaskColumn({ droppableId, title, count, children }) {
@@ -19,7 +19,7 @@ function TaskColumn({ droppableId, title, count, children }) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`min-h-[220px] space-y-3 rounded-xl border border-dashed p-2 ${
+            className={`min-h-55 space-y-3 rounded-xl border border-dashed p-2 ${
               snapshot.isDraggingOver ? 'border-indigo-400/50 bg-indigo-500/10' : 'border-white/10'
             }`}
           >
