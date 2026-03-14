@@ -12,7 +12,7 @@ export default function OAuthSuccess() {
     const token = params.get('token')
     if (token) {
       setTokenFromOAuth(token)
-      navigate('/home', { replace: true })
+      navigate('/dashboard', { replace: true })
     } else {
       navigate('/login', { replace: true })
     }

@@ -1,25 +1,29 @@
 import { motion } from 'framer-motion'
 import { Chrome, Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import LoadingButton from '../components/LoadingButton'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const { login, loading } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const apiUrl = import.meta.env.VITE_API_URL
-  const googleHref = import.meta.env.DEV ? '/api/auth/google' : `${apiUrl}/api/auth/google`
+  const frontendOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+  const googleBase = import.meta.env.DEV ? '/api/auth/google' : apiUrl ? `${apiUrl}/api/auth/google` : '/api/auth/google'
+  const googleHref = `${googleBase}?redirect=${encodeURIComponent(frontendOrigin)}`
+  const oauthFailed = searchParams.get('oauth') === 'failed'
 
   const onSubmit = async (e) => {
     e.preventDefault()
     setError('')
     const res = await login({ email, password })
     if (!res.ok) return setError(res.message)
-    navigate('/home')
+    navigate('/dashboard')
   }
 
   return (
@@ -36,6 +40,12 @@ export default function Login() {
             AI-powered productivity, built like a modern SaaS.
           </div>
         </div>
+
+        {oauthFailed ? (
+          <div className='mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100'>
+            Google sign-in was cancelled or failed. Please try again.
+          </div>
+        ) : null}
 
         <a className='btn w-full justify-center' href={googleHref}>
           <Chrome className='h-4 w-4' />

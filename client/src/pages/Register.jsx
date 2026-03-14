@@ -18,7 +18,7 @@ export default function Register() {
     setError('')
     const res = await register({ name, email, password })
     if (!res.ok) return setError(res.message)
-    navigate('/home')
+    navigate('/dashboard')
   }
 
   return (
