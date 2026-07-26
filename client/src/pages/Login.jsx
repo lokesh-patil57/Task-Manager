@@ -67,7 +67,7 @@ export default function Login() {
                 className='input pl-9'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder='you@company.com'
+                placeholder=''
                 type='email'
                 required
               />
@@ -81,7 +81,7 @@ export default function Login() {
                 className='input pl-9'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder='••••••••'
+                placeholder=''
                 type='password'
                 required
               />
