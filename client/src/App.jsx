@@ -56,7 +56,7 @@ const Register     = lazy(() => import('./pages/Register.jsx'))
 const OAuthSuccess = lazy(() => import('./pages/OAuthSuccess.jsx'))
 const Dashboard    = lazy(() => import('./pages/Dashboard.jsx'))
 const Tasks        = lazy(() => import('./pages/Tasks.jsx'))
-const Analytics    = lazy(() => import('./pages/Analytics.jsx'))
+const AnalyticsPage    = lazy(() => import('./pages/Analytics.jsx'))
 const Profile      = lazy(() => import('./pages/Profile.jsx'))
 const AIPlanner    = lazy(() => import('./pages/AIPlanner.jsx'))
 const AIBreakdown  = lazy(() => import('./pages/AIBreakdown.jsx'))
@@ -137,7 +137,7 @@ const App = () => {
 
           <Route path='/analytics' element={
             <ProtectedRoute>
-              <AppShell title='Analytics'><Page><Analytics /></Page></AppShell>
+              <AppShell title='Analytics'><Page><AnalyticsPage /></Page></AppShell>
             </ProtectedRoute>
           } />
 
